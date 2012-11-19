@@ -28,32 +28,34 @@ void type_check(const yaml_iarchive_cast& yaml, YAML::NodeType::value expect) {
 }
 
 template <typename T>
+void serialize_primitive(const yaml_iarchive_cast& yaml, T& v) {
+  type_check(yaml, YAML::NodeType::Scalar);
+  yaml.get() >> v;
+}
+
+template <typename T>
 inline void serialize(const yaml_iarchive_cast& yaml, T& n) {
   pfi::data::serialization::access::serialize(yaml, n);
 }
 
 template <>
 inline void serialize(const yaml_iarchive_cast& yaml, bool& v) {
-  type_check(yaml, YAML::NodeType::Scalar);
-  yaml.get() >> v;
+  serialize_primitive(yaml, v);
 }
 
 template <>
-inline void serialize(const yaml_iarchive_cast& yaml, int& n) {
-  type_check(yaml, YAML::NodeType::Scalar);
-  yaml.get() >> n;
+inline void serialize(const yaml_iarchive_cast& yaml, int& v) {
+  serialize_primitive(yaml, v);
 }
 
 template <>
 inline void serialize(const yaml_iarchive_cast& yaml, double& v) {
-  type_check(yaml, YAML::NodeType::Scalar);
-  yaml.get() >> v;
+  serialize_primitive(yaml, v);
 }
 
 template <>
 inline void serialize(const yaml_iarchive_cast& yaml, std::string& v) {
-  type_check(yaml, YAML::NodeType::Scalar);
-  yaml.get() >> v;
+  serialize_primitive(yaml, v);
 }
 
 template <typename T>
