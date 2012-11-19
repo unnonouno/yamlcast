@@ -30,7 +30,13 @@ void type_check(const yaml_iarchive_cast& yaml, YAML::NodeType::value expect) {
 template <typename T>
 void serialize_primitive(const yaml_iarchive_cast& yaml, T& v) {
   type_check(yaml, YAML::NodeType::Scalar);
-  yaml.get() >> v;
+  try {
+    yaml.get() >> v;
+  } catch(YAML::InvalidScalar& e) {
+    std::string value;
+    yaml.get().GetScalar(value);
+    throw yaml_invalid_scalar(value, typeid(T), e.mark);
+  }
 }
 
 template <typename T>

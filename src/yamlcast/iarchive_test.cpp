@@ -29,9 +29,10 @@ TEST(iarchive, bool) {
   test_eq<bool>("false", false);
 }
 
-TEST(iarchive, bool_bad_cast) {
+TEST(iarchive, invalid_bool) {
   bool v;
   EXPECT_THROW(deserialize("[]", v), yaml_bad_cast);
+  EXPECT_THROW(deserialize("10", v), yaml_invalid_scalar);
 }
 
 TEST(iarchive, int) {
