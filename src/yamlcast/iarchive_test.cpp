@@ -39,12 +39,29 @@ TEST(iarchive, int) {
   test_eq<int>("10", 10);
 }
 
+TEST(iarchive, invalid_int) {
+  int v;
+  EXPECT_THROW(deserialize("[]", v), yaml_bad_cast);
+  EXPECT_THROW(deserialize("true", v), yaml_invalid_scalar);
+}
+
 TEST(iarchive, double) {
   test_eq<double>("1.5", 1.5);
 }
 
+TEST(iarchive, invalid_double) {
+  double v;
+  EXPECT_THROW(deserialize("{}", v), yaml_bad_cast);
+  EXPECT_THROW(deserialize("true", v), yaml_invalid_scalar);
+}
+
 TEST(iarchive, string) {
   test_eq<string>("\"hello\"", "hello");
+}
+
+TEST(iarchive, invalid_string) {
+  double v;
+  EXPECT_THROW(deserialize("{}", v), yaml_bad_cast);
 }
 
 TEST(iarchive, vector) {
