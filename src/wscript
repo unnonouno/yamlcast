@@ -1,0 +1,4 @@
+def build(bld):
+    bld.recurse('yamlcast')
+
+    bld.install_files('${PREFIX}/include', 'yamlcast.hpp')
