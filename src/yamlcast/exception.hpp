@@ -36,6 +36,14 @@ class yaml_bad_cast : public std::bad_cast {
     return msg_.c_str();
   }
 
+  const YAML::NodeType::value& get_expect() const {
+    return expect_;
+  }
+
+  const YAML::NodeType::value& get_actual() const {
+    return actual_;
+  }
+
  private:
   std::string msg_;
   YAML::NodeType::value expect_;
