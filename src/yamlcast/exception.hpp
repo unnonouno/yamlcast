@@ -16,7 +16,7 @@ namespace yamlcast {
 std::string make_msg(const char* msg,
                      const YAML::Mark& mark) {
   std::stringstream ss;
-  ss << msg 
+  ss << msg
      << " at line " << mark.line + 1
      << ", column " << mark.column + 1;
   return ss.str();
@@ -54,7 +54,7 @@ class yaml_invalid_scalar : public std::bad_cast {
  public:
   yaml_invalid_scalar(const std::string& value,
                       const std::type_info& type,
-                      const YAML::Mark& mark) 
+                      const YAML::Mark& mark)
       : msg_(make_msg("invalid scalar", mark)
              + ": "
              + "Cannot convert \"" + value + "\" to "
@@ -75,6 +75,6 @@ class yaml_invalid_scalar : public std::bad_cast {
   YAML::Mark mark_;
 };
 
-}
+}  // namespace yamlcast
 
-#endif // YAMLCAST__YAML_EXCEPTION_HPP_
+#endif  // YAMLCAST__YAML_EXCEPTION_HPP_

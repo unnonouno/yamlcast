@@ -1,15 +1,13 @@
 #ifndef YAMLCAST__UTIL_HPP_
 #define YAMLCAST__UTIL_HPP_
 
-#include <string>
-
 #include <yaml-cpp/yaml.h>
 
 namespace yamlcast {
 
 inline
 const char* type_to_string(YAML::NodeType::value t) {
-  switch(t) {
+  switch (t) {
     case YAML::NodeType::Null:
       return "null";
     case YAML::NodeType::Scalar:
@@ -23,6 +21,6 @@ const char* type_to_string(YAML::NodeType::value t) {
   }
 }
 
-}
+}  // namespace yamlcast
 
-#endif // YAMLCAST__UTIL_HPP_
+#endif  // YAMLCAST__UTIL_HPP_

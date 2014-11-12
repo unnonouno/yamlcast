@@ -1,10 +1,14 @@
-#include <gtest/gtest.h>
-#include "iarchive.hpp"
-
+#include <map>
 #include <string>
 #include <vector>
 
-using namespace std;
+#include <gtest/gtest.h>
+
+#include "iarchive.hpp"
+
+using std::map;
+using std::string;
+using std::vector;
 
 namespace yamlcast {
 
@@ -65,7 +69,7 @@ TEST(iarchive, vector) {
   vector<int> v;
   v.push_back(0);
   v.push_back(1);
-  
+
   test_eq<vector<int> >("[0, 1]", v);
 }
 
@@ -97,5 +101,4 @@ TEST(iarchive, object) {
   EXPECT_EQ("saitama", s.tags[0]);
 }
 
-
-}
+}  // namespace yamlcast

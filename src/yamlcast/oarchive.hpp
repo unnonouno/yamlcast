@@ -1,17 +1,19 @@
 #ifndef YAMLCAST__YAML_OARCHIVE_HPP_
 #define YAMLCAST__YAML_OARCHIVE_HPP_
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 #include <yaml-cpp/yaml.h>
+
+//#include <pficommon/data/serialization.h>
 
 namespace yamlcast {
 
 class yaml_oarchive_cast {
  public:
-  yaml_oarchive_cast(YAML::Emitter& yaml) : yaml_(yaml) {}
+  explicit yaml_oarchive_cast(YAML::Emitter& yaml) : yaml_(yaml) {}
   YAML::Emitter& get() const { return yaml_; }
 
  private:
@@ -50,7 +52,8 @@ inline void serialize(const yaml_oarchive_cast& yaml, std::vector<T>& vec) {
 }
 
 template <typename T>
-inline void serialize(const yaml_oarchive_cast& yaml, std::map<std::string, T>& map) {
+inline
+void serialize(const yaml_oarchive_cast& yaml, std::map<std::string, T>& map) {
   yaml.get() << YAML::BeginMap;
   for (typename std::map<std::string, T>::const_iterator it = map.begin();
        it != map.end(); ++it) {
@@ -62,14 +65,16 @@ inline void serialize(const yaml_oarchive_cast& yaml, std::map<std::string, T>& 
 }
 
 template <typename T>
-inline void serialize(const yaml_oarchive_cast& yaml, pfi::data::serialization::named_value<T>& v) {
+inline
+void serialize(
+    const yaml_oarchive_cast& yaml,
+    pfi::data::serialization::named_value<T>& v) {
   yaml.get() << YAML::Key << v.name;
   yaml.get() << YAML::Value << v.v;
 }
 
 template <class T>
-inline const yaml_oarchive_cast &operator&(const yaml_oarchive_cast &ar, T &v)
-{
+inline const yaml_oarchive_cast &operator&(const yaml_oarchive_cast &ar, T &v) {
   serialize(ar, v);
   return ar;
 }
@@ -88,6 +93,6 @@ std::string to_yaml(const T& v) {
   return yaml.c_str();
 }
 
-}
+}  // namespace yamlcast
 
-#endif // YAMLCAST__OARCHIVE_HPP_
+#endif  // YAMLCAST__OARCHIVE_HPP_
