@@ -10,10 +10,7 @@ namespace yamlcast {
 
 template <typename T>
 void deserialize(const string& str, T& v) {
-  YAML::Node yaml;
-  stringstream ss(str);
-  YAML::Parser p(ss);
-  p.GetNextDocument(yaml);
+  YAML::Node yaml = YAML::Load(str);
   from_yaml(yaml, v);
 }
 

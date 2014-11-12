@@ -21,6 +21,9 @@ class yaml_iarchive_cast {
   const YAML::Node& yaml_;
 };
 
+template <typename T>
+void from_yaml(const YAML::Node& yaml, T& v);
+
 inline
 void type_check(const yaml_iarchive_cast& yaml, YAML::NodeType::value expect) {
   if (yaml.get().Type() != expect)
@@ -31,10 +34,9 @@ template <typename T>
 void serialize_primitive(const yaml_iarchive_cast& yaml, T& v) {
   type_check(yaml, YAML::NodeType::Scalar);
   try {
-    yaml.get() >> v;
-  } catch(YAML::InvalidScalar& e) {
-    std::string value;
-    yaml.get().GetScalar(value);
+    v = yaml.get().as<T>();
+  } catch(YAML::BadConversion& e) {
+    const std::string& value = yaml.get().Scalar();
     throw yaml_invalid_scalar(value, typeid(T), e.mark);
   }
 }
@@ -78,12 +80,12 @@ template <typename K, typename T>
 inline void serialize(const yaml_iarchive_cast& yaml, std::map<K, T>& map) {
   type_check(yaml, YAML::NodeType::Map);
   std::map<std::string, T> m;
-  for (YAML::Iterator it = yaml.get().begin();
+  for (YAML::const_iterator it = yaml.get().begin();
        it != yaml.get().end(); ++it) {
     K key;
-    from_yaml(it.first(), key);
+    from_yaml(it->first, key);
     T value;
-    from_yaml(it.second(), value);
+    from_yaml(it->second, value);
     m[key] = value;
   }
   m.swap(map);
@@ -92,7 +94,7 @@ inline void serialize(const yaml_iarchive_cast& yaml, std::map<K, T>& map) {
 template <typename T>
 inline void serialize(const yaml_iarchive_cast& yaml, pfi::data::serialization::named_value<T>& v) {
   type_check(yaml, YAML::NodeType::Map);
-  if (!yaml.get().FindValue(v.name))
+  if (!yaml.get()[v.name])
     throw std::bad_cast();
   serialize(yaml.get()[v.name], v.v);
 }

@@ -11,7 +11,7 @@ def configure(conf):
   conf.load('unittest_gtest')
 
   conf.check_cfg(package = 'pficommon', args = '--cflags --libs')
-  conf.check_cfg(package = 'yaml-cpp', args = '--cflags --libs')
+  conf.check_cfg(package = 'yaml-cpp', args = '--cflags --libs', atleast_version='0.5')
 
 def build(bld):
   bld.recurse('src')
