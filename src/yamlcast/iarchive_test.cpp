@@ -3,7 +3,6 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-
 #include "iarchive.hpp"
 
 using std::map;
@@ -14,8 +13,19 @@ namespace yamlcast {
 
 template <typename T>
 void deserialize(const string& str, T& v) {
-  YAML::Node yaml = YAML::Load(str);
-  from_yaml(yaml, v);
+  yaml_parser_t parser;
+  ::yaml_parser_initialize(&parser);
+  ::yaml_parser_set_input_string(
+       &parser,
+       reinterpret_cast<const unsigned char*>(str.c_str()),
+       str.size());
+  yaml_document_t document;
+  ::yaml_parser_load(&parser, &document);
+  ::yaml_parser_delete(&parser);
+
+  v = yaml_cast<T>(document);
+
+  ::yaml_document_delete(&document);
 }
 
 template <typename T>
@@ -83,22 +93,42 @@ TEST(iarchive, map) {
 
 struct Struct {
   int age;
+  int nam;
   string name;
   vector<string> tags;
 
   template <typename Ar>
   void serialize(Ar& ar) {
-    ar & MEMBER(age) & MEMBER(name) & MEMBER(tags);
+    ar & MEMBER(age) & MEMBER(nam) & MEMBER(name) & MEMBER(tags);
   }
 };
 
 TEST(iarchive, object) {
   Struct s;
-  deserialize("{age: 10, name: \"taro\", tags: [\"saitama\"]}", s);
+  deserialize("{age: 10, nam: 1, name: \"taro\", tags: [\"saitama\"]}", s);
   EXPECT_EQ(10, s.age);
   EXPECT_EQ("taro", s.name);
   ASSERT_EQ(1u, s.tags.size());
   EXPECT_EQ("saitama", s.tags[0]);
+}
+
+struct OptionalStruct {
+  pfi::data::optional<int> n;
+  pfi::data::optional<int> m;
+
+  template <typename Ar>
+  void serialize(Ar& ar) {
+    ar & MEMBER(n) & MEMBER(m);
+  }
+};
+
+TEST(iarchive, optional) {
+  OptionalStruct s;
+  s.m = 100;
+  deserialize("{n: 10}", s);
+  EXPECT_TRUE(s.n);
+  EXPECT_EQ(10, s.n);
+  EXPECT_FALSE(s.m);
 }
 
 }  // namespace yamlcast

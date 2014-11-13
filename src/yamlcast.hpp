@@ -1,7 +1,7 @@
-#ifndef YAMLCAST_HPP_
-#define YAMLCAST_HPP_
+#ifndef YAMLCAST_HPP_EAA5E9B1_923F_439B_8EAE_0B8808AEE23E_
+#define YAMLCAST_HPP_EAA5E9B1_923F_439B_8EAE_0B8808AEE23E_
 
-#include "yamlcast/iarchive.hpp"
-#include "yamlcast/oarchive.hpp"
+#include "./yamlcast/exception.hpp"
+#include "./yamlcast/iarchive.hpp"
 
-#endif  // YAMLCAST_HPP_
+#endif  // YAMLCAST_HPP_EAA5E9B1_923F_439B_8EAE_0B8808AEE23E_

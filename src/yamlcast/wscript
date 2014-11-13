@@ -3,14 +3,13 @@ def build(bld):
         features='gtest',
         source='iarchive_test.cpp',
         target='iarchive_test',
-        use=['YAML-CPP', 'PFICOMMON']
+        use=['YAML-0.1', 'PFICOMMON']
         )
 
     bld.install_files(
         '${PREFIX}/include/yamlcast',
         [
             'iarchive.hpp',
-            'oarchive.hpp',
             'exception.hpp',
             'util.hpp',
         ])
