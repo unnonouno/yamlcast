@@ -14,11 +14,10 @@ Requirement
   - https://github.com/pfi/pficommon
   - Common library for C++ including serialization library
 
-- yaml-cpp
+- libyaml
 
-  - http://code.google.com/p/yaml-cpp/
-  - YAML libarary for C++
-  - yamlcast only works in the old API
+  - http://pyyaml.org/wiki/LibYAML
+  - YAML libarary for C
 
 
 Install
@@ -38,9 +37,13 @@ This library works like pficommon's serialization library.
 
 ::
 
- YAML::Node node;
- // parse YAML ...
- int n = yamlcast::yaml_cast<int>(node);
+   // Use libyaml to load yaml file
+   yaml_parser_t parser;
+   ::yaml_parser_initialize(&parser);
+   ::yaml_parser_set_input_file(&parser, file);
+   yaml_document_t yaml;
+   ::yaml_parser_load(&parser, &yaml);
+   ::yaml_parser_delete(&parser);
 
 
 And, use `serialize` method and `operator &` for your own strcuts like pficommon.
@@ -57,10 +60,10 @@ And, use `serialize` method and `operator &` for your own strcuts like pficommon
    }
  };
 
- User user = yamlcast::yaml_cast<User>(node);
+ User user = yamlcast::yaml_cast<User>(yaml);
 
 
-See the sources for more usage!
+See the tests for more usage!
 
 
 License
