@@ -1,6 +1,7 @@
 #ifndef IARCHIVE_HPP_C086E45B_D690_4375_8463_B29BD459F3FD_
 #define IARCHIVE_HPP_C086E45B_D690_4375_8463_B29BD459F3FD_
 
+#include <stdint.h>
 #include <cstring>
 #include <map>
 #include <string>
@@ -91,9 +92,26 @@ void serialize(const yaml_iarchive_cast& yaml, bool& v) {
       typeid(bool));  // NOLINT(readability/function)
 }
 
+#define YAMLCAST_GEN_INT_SERIALIZE(T)                    \
+  template <>                                            \
+  inline                                                 \
+  void serialize(const yaml_iarchive_cast& yaml, T& v) { \
+    serialize_primitive(yaml, v);                        \
+  }
+
+YAMLCAST_GEN_INT_SERIALIZE(int8_t)
+YAMLCAST_GEN_INT_SERIALIZE(int16_t)
+YAMLCAST_GEN_INT_SERIALIZE(int32_t)
+YAMLCAST_GEN_INT_SERIALIZE(int64_t)
+
+YAMLCAST_GEN_INT_SERIALIZE(uint8_t)
+YAMLCAST_GEN_INT_SERIALIZE(uint16_t)
+YAMLCAST_GEN_INT_SERIALIZE(uint32_t)
+YAMLCAST_GEN_INT_SERIALIZE(uint64_t)
+
 template <>
 inline
-void serialize(const yaml_iarchive_cast& yaml, int& v) {
+void serialize(const yaml_iarchive_cast& yaml, float& v) {
   serialize_primitive(yaml, v);
 }
 
