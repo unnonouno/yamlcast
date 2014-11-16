@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "exception.hpp"
 #include "iarchive.hpp"
 
 using std::map;
@@ -110,6 +111,16 @@ TEST(iarchive, object) {
   EXPECT_EQ("taro", s.name);
   ASSERT_EQ(1u, s.tags.size());
   EXPECT_EQ("saitama", s.tags[0]);
+}
+
+TEST(iarchive, not_found) {
+  Struct s;
+  try {
+    deserialize("{age: 10, nam: 1, tags: [\"saitama\"]}", s);
+    FAIL();
+  } catch(const yaml_not_found& e) {
+    EXPECT_EQ("name", e.get_key());
+  }
 }
 
 struct OptionalStruct {

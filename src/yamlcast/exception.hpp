@@ -113,6 +113,10 @@ class yaml_not_found : public yaml_cast_exception {
 
   ~yaml_not_found() throw() {}
 
+  const std::string& get_key() const {
+    return key_;
+  }
+
  private:
   const std::string key_;
 };
