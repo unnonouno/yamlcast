@@ -5,6 +5,7 @@ compiler:
 
 before_install:
   - sudo apt-get install libyaml-dev
+  - sudo apt-get install cppcheck
   - git clone https://github.com/pfi/pficommon.git
   - pushd pficommon
   - ./waf configure
@@ -21,6 +22,7 @@ script:
   - ./waf configure --enable-gcov
   - ./waf build --checkall
   - ./waf cpplint
+  - cppcheck src/**/*pp
 
 after_success:
   - sudo pip install cpp-coveralls
