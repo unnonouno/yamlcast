@@ -2,6 +2,13 @@
  yamlcast
 ==========
 
+.. image:: https://travis-ci.org/unnonouno/yamlcast.svg?branch=cppcheck
+    :target: https://travis-ci.org/unnonouno/yamlcast
+
+.. image:: https://coveralls.io/repos/unnonouno/yamlcast/badge.png?branch=master
+  :target: https://coveralls.io/r/unnonouno/yamlcast?branch=master
+
+
 yamlcast is a simple YAML serialization library for pficommon.
 You can serialize and deserialize arbitrary data with pficommon's serialization method.
 
