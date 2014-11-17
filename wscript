@@ -6,6 +6,12 @@ def options(opt):
     opt.load('compiler_cxx')
     opt.load('unittest_gtest')
 
+    opt.add_option('--enable-gcov',
+                   action='store_true',
+                   default=False,
+                   dest='gcov',
+                   help='only for debug')
+
 
 def configure(conf):
     conf.env.CXXFLAGS += ['-O2', '-Wall', '-g', '-pipe']
@@ -14,6 +20,13 @@ def configure(conf):
 
     conf.check_cfg(package='pficommon', args='--cflags --libs')
     conf.check_cfg(package='yaml-0.1', args='--cflags --libs')
+
+    if conf.options.gcov:
+        conf.env.append_value('CXXFLAGS', '-fprofile-arcs')
+        conf.env.append_value('CXXFLAGS', '-ftest-coverage')
+        conf.env.append_value('LINKFLAGS', '-lgcov')
+        conf.env.append_value('LINKFLAGS', '-fprofile-arcs')
+        conf.env.append_value('LINKFLAGS', '-ftest-coverage')
 
 
 def build(bld):
@@ -38,3 +51,16 @@ def cpplint(ctx):
     result = ctx.exec_command(args)
     if result == 0:
         ctx.fatal('cpplint failed')
+
+
+def gcovr(ctx):
+    excludes = [
+        '.*\\.unittest-gtest.*',
+        '.*_test\\.cpp',
+    ]
+
+    args = 'gcovr --branches -r . '
+    for e in excludes:
+        args += ' -e "%s"' % e
+
+    ctx.exec_command(args)
