@@ -142,4 +142,18 @@ TEST(iarchive, optional) {
   EXPECT_FALSE(s.m);
 }
 
+struct Empty {
+  int n;
+  template <typename Ar>
+  void serialize(Ar& ar) {
+    ar & MEMBER(n);
+  }
+};
+
+TEST(iarchive, ignore_non_scalar_key) {
+  Empty e;
+  deserialize("{[aa]: 1, n: 10}", e);
+  EXPECT_EQ(10, e.n);
+}
+
 }  // namespace yamlcast
