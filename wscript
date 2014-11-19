@@ -30,6 +30,14 @@ def configure(conf):
 
 
 def build(bld):
+    bld(source='yamlcast.pc.in',
+        prefix=bld.env['PREFIX'],
+        exec_prefix='${prefix}',
+        libdir=bld.env['LIBDIR'],
+        includedir='${prefix}/include',
+        PACKAGE=APPNAME,
+        VERSION=VERSION)
+
     bld.recurse('src')
 
 
