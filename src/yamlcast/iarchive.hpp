@@ -20,15 +20,10 @@ namespace yamlcast {
 
 class yaml_iarchive_cast {
  public:
-  explicit yaml_iarchive_cast(const yaml_document_t* yaml)
-      : yaml_(yaml),
-        node_(
-            ::yaml_document_get_root_node(
-                 const_cast<yaml_document_t*>(yaml))) {
-  }
-  yaml_iarchive_cast(
-      const yaml_document_t* yaml,
-      const yaml_node_t* node) : yaml_(yaml), node_(node) {}
+  explicit yaml_iarchive_cast(const yaml_document_t* yaml);
+
+  yaml_iarchive_cast(const yaml_document_t* yaml, const yaml_node_t* node);
+
   const yaml_document_t& get() const { return *yaml_; }
   const yaml_node_t& node() const { return *node_; }
   const yaml_node_t& get_item(int key) const {
@@ -43,92 +38,35 @@ class yaml_iarchive_cast {
 template <typename T>
 void from_yaml(const yaml_document_t& yaml, T& v);
 
-inline
-void type_check(const yaml_iarchive_cast& yaml, yaml_node_type_t expect) {
-  if (yaml.node().type != expect)
-    throw yaml_bad_cast(yaml.node(), expect, yaml.node().type);
-}
+void type_check(const yaml_iarchive_cast& yaml, yaml_node_type_t expect);
 
 template <typename T>
-void serialize_primitive(const yaml_iarchive_cast& yaml, T& v) {
-  type_check(yaml, YAML_SCALAR_NODE);
-  const yaml_node_t& node = yaml.node();
-  std::string value(
-      reinterpret_cast<const char*>(node.data.scalar.value),
-      node.data.scalar.length);
-
-  try {
-    v = pfi::lang::lexical_cast<T>(value);
-  } catch(std::bad_cast& e) {
-    throw yaml_invalid_scalar(node, value, typeid(T));
-  }
-}
-
-template <typename T>
-inline
 void serialize(const yaml_iarchive_cast& yaml, T& n) {
   pfi::data::serialization::access::serialize(yaml, n);
 }
 
 template <>
-inline
-void serialize(const yaml_iarchive_cast& yaml, bool& v) {
-  type_check(yaml, YAML_SCALAR_NODE);
+void serialize(const yaml_iarchive_cast& yaml, bool& v);
 
-  const yaml_node_t& node = yaml.node();
-  size_t length = node.data.scalar.length;
-  const char* value = reinterpret_cast<const char*>(node.data.scalar.value);
-  if (length == 4 && std::strncmp(value, "true", 4) == 0) {
-    v = true;
-    return;
-  }
-  if (length == 5 && std::strncmp(value, "false", 5) == 0) {
-    v = false;
-    return;
-  }
-  throw yaml_invalid_scalar(
-      node,
-      value,
-      typeid(bool));  // NOLINT(readability/function)
-}
+#define YAMLCAST_GEN_SERIALIZE_DEF(T)                   \
+  template <>                                           \
+  void serialize(const yaml_iarchive_cast& yaml, T& v);
 
-#define YAMLCAST_GEN_INT_SERIALIZE(T)                    \
-  template <>                                            \
-  inline                                                 \
-  void serialize(const yaml_iarchive_cast& yaml, T& v) { \
-    serialize_primitive(yaml, v);                        \
-  }
+YAMLCAST_GEN_SERIALIZE_DEF(int8_t)
+YAMLCAST_GEN_SERIALIZE_DEF(int16_t)
+YAMLCAST_GEN_SERIALIZE_DEF(int32_t)
+YAMLCAST_GEN_SERIALIZE_DEF(int64_t)
 
-YAMLCAST_GEN_INT_SERIALIZE(int8_t)
-YAMLCAST_GEN_INT_SERIALIZE(int16_t)
-YAMLCAST_GEN_INT_SERIALIZE(int32_t)
-YAMLCAST_GEN_INT_SERIALIZE(int64_t)
+YAMLCAST_GEN_SERIALIZE_DEF(uint8_t)
+YAMLCAST_GEN_SERIALIZE_DEF(uint16_t)
+YAMLCAST_GEN_SERIALIZE_DEF(uint32_t)
+YAMLCAST_GEN_SERIALIZE_DEF(uint64_t)
 
-YAMLCAST_GEN_INT_SERIALIZE(uint8_t)
-YAMLCAST_GEN_INT_SERIALIZE(uint16_t)
-YAMLCAST_GEN_INT_SERIALIZE(uint32_t)
-YAMLCAST_GEN_INT_SERIALIZE(uint64_t)
-
-template <>
-inline
-void serialize(const yaml_iarchive_cast& yaml, float& v) {
-  serialize_primitive(yaml, v);
-}
-
-template <>
-inline
-void serialize(const yaml_iarchive_cast& yaml, double& v) {
-  serialize_primitive(yaml, v);
-}
-
-template <>
-inline
-void serialize(const yaml_iarchive_cast& yaml, std::string& v) {
-  serialize_primitive(yaml, v);
-}
+YAMLCAST_GEN_SERIALIZE_DEF(float)
+YAMLCAST_GEN_SERIALIZE_DEF(double)
+YAMLCAST_GEN_SERIALIZE_DEF(std::string)
 
 template <typename T>
-inline
 void serialize(const yaml_iarchive_cast& yaml, std::vector<T>& vec) {
   type_check(yaml, YAML_SEQUENCE_NODE);
   const yaml_node_t& node = yaml.node();
@@ -144,7 +82,6 @@ void serialize(const yaml_iarchive_cast& yaml, std::vector<T>& vec) {
 }
 
 template <typename K, typename T>
-inline
 void serialize(const yaml_iarchive_cast& yaml, std::map<K, T>& map) {
   type_check(yaml, YAML_MAPPING_NODE);
   const yaml_node_t& node = yaml.node();
@@ -164,27 +101,9 @@ void serialize(const yaml_iarchive_cast& yaml, std::map<K, T>& map) {
 
 const yaml_node_t* find(
     const yaml_iarchive_cast& yaml,
-    const std::string& key) {
-  const yaml_node_t& node = yaml.node();
-  for (yaml_node_pair_t* it = node.data.mapping.pairs.start;
-       it < node.data.mapping.pairs.top; ++it) {
-    const yaml_node_t& key_node = yaml.get_item(it->key);
-    // Is it error?
-    if (key_node.type != YAML_SCALAR_NODE)
-      continue;
-
-    const char* value
-        = reinterpret_cast<const char*>(key_node.data.scalar.value);
-    size_t length = key_node.data.scalar.length;
-    if (length == key.size() && std::strncmp(key.c_str(), value, length) == 0) {
-      return &yaml.get_item(it->value);
-    }
-  }
-  return NULL;
-}
+    const std::string& key);
 
 template <typename T>
-inline
 void serialize(
     const yaml_iarchive_cast& yaml,
     pfi::data::serialization::named_value<pfi::data::optional<T> >& v) {
@@ -200,7 +119,6 @@ void serialize(
 }
 
 template <typename T>
-inline
 void serialize(
     const yaml_iarchive_cast& yaml,
     pfi::data::serialization::named_value<T>& v) {

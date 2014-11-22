@@ -1,9 +1,18 @@
 def build(bld):
+    bld.shlib(
+        source=[
+            'iarchive.cpp',
+        ],
+        target='yamlcast',
+        use=['YAML-0.1', 'PFICOMMON'],
+        vnum=bld.env.VERSION,
+    )
+
     bld.program(
         features='gtest',
         source='iarchive_test.cpp',
         target='iarchive_test',
-        use=['YAML-0.1', 'PFICOMMON']
+        use=['YAML-0.1', 'PFICOMMON', 'yamlcast']
         )
 
     bld.install_files(
