@@ -41,16 +41,17 @@ Usage
 =====
 
 This library works like pficommon's serialization library.
+It provide a thin wrapper for libyaml.
 
 ::
 
-   // Use libyaml to load yaml file
-   yaml_parser_t parser;
-   ::yaml_parser_initialize(&parser);
-   ::yaml_parser_set_input_file(&parser, file);
-   yaml_document_t yaml;
-   ::yaml_parser_load(&parser, &yaml);
-   ::yaml_parser_delete(&parser);
+   yamlcast::docuemnt::ptr doc = yamlcast::document::parse_file(path);
+
+Or,
+
+::
+
+   yamlcast::docuemnt::ptr doc = yamlcast::document::parse_string(str);
 
 
 And, use `serialize` method and `operator &` for your own strcuts like pficommon.
@@ -67,7 +68,7 @@ And, use `serialize` method and `operator &` for your own strcuts like pficommon
    }
  };
 
- User user = yamlcast::yaml_cast<User>(yaml);
+ User user = yamlcast::yaml_cast<User>(*doc);
 
 
 See the tests for more usage!
