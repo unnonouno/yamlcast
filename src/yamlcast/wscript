@@ -1,15 +1,39 @@
 def build(bld):
-    bld.program(
-        features='gtest',
-        source='iarchive_test.cpp',
-        target='iarchive_test',
-        use=['YAML-0.1', 'PFICOMMON']
+    bld.shlib(
+        source=[
+            'exception.cpp',
+            'iarchive.cpp',
+            'mapping.cpp',
+            'scalar.cpp',
+            'sequence.cpp',
+            'yaml.cpp',
+        ],
+        target='yamlcast',
+        use=['YAML-0.1', 'PFICOMMON'],
+        vnum=bld.env.VERSION,
+    )
+
+    tests = [
+        'iarchive_test',
+        'yaml_test',
+    ]
+
+    for t in tests:
+        bld.program(
+            features='gtest',
+            source=t + '.cpp',
+            target=t,
+            use=['YAML-0.1', 'PFICOMMON', 'yamlcast']
         )
 
     bld.install_files(
         '${PREFIX}/include/yamlcast',
         [
-            'iarchive.hpp',
             'exception.hpp',
+            'iarchive.hpp',
+            'mapping.hpp',
+            'scalar.hpp',
+            'sequence.hpp',
             'util.hpp',
+            'yaml.hpp',
         ])

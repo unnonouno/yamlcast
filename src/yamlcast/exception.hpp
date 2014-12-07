@@ -10,33 +10,15 @@
 
 #include <pficommon/lang/demangle.h>
 
-#include "util.hpp"
+#include "yaml.hpp"
 
 namespace yamlcast {
 
-std::string make_msg(
-    const char* msg,
-    const yaml_node_t& node) {
-  std::stringstream ss;
-  ss << msg
-     << " at line:" << node.start_mark.line
-     << " col:" << node.start_mark.column
-     << " - line:" << node.end_mark.line
-     << " col:" << node.end_mark.column;
-  return ss.str();
-}
-
-class yaml_cast_exception : public std::exception {
+class yaml_exception : public std::exception {
  public:
-  explicit yaml_cast_exception(
-      const yaml_node_t& node,
-      const std::string& msg)
-      : msg_(make_msg(msg.c_str(), node)),
-        start_mark_(node.start_mark),
-        end_mark_(node.end_mark) {
-  }
+  explicit yaml_exception(const std::string& msg);
 
-  virtual ~yaml_cast_exception() throw() {}
+  virtual ~yaml_exception() throw();
 
   const char* what() const throw() {
     return msg_.c_str();
@@ -44,27 +26,49 @@ class yaml_cast_exception : public std::exception {
 
  private:
   const std::string msg_;
-  yaml_mark_t start_mark_;
-  yaml_mark_t end_mark_;
+};
+
+class yaml_parse_exception : public yaml_exception {
+ public:
+  yaml_parse_exception(
+      const char*& msg,
+      const yaml_mark_t& mark);
+
+  const yaml_mark_t& get_problem_mark() const {
+    return problem_mark_;
+  }
+
+ private:
+  const yaml_mark_t problem_mark_;
+};
+
+class yaml_cast_exception : public yaml_exception {
+ public:
+  explicit yaml_cast_exception(
+      const class node& node,
+      const std::string& msg);
+
+  const yaml_mark_t& get_start_mark() const {
+    return start_mark_;
+  }
+
+  const yaml_mark_t& get_end_mark() const {
+    return end_mark_;
+  }
+
+ private:
+  const yaml_mark_t start_mark_;
+  const yaml_mark_t end_mark_;
 };
 
 class yaml_bad_cast : public yaml_cast_exception {
  public:
   yaml_bad_cast(
-      const yaml_node_t& node,
+      const node& node,
       yaml_node_type_t expect,
-      yaml_node_type_t actual)
-      : yaml_cast_exception(
-            node,
-            std::string("invalid type: ")
-            + type_to_string(expect)
-            + " is expected, but is "
-            + type_to_string(actual)),
-        expect_(expect),
-        actual_(actual) {
-  }
+      yaml_node_type_t actual);
 
-  ~yaml_bad_cast() throw() {}
+  ~yaml_bad_cast() throw();
 
   yaml_node_type_t get_expect() const {
     return expect_;
@@ -82,18 +86,15 @@ class yaml_bad_cast : public yaml_cast_exception {
 class yaml_invalid_scalar : public yaml_cast_exception {
  public:
   yaml_invalid_scalar(
-      const yaml_node_t& node,
+      const node& node,
       const std::string& value,
-      const std::type_info& type)
-      : yaml_cast_exception(
-            node,
-            "Cannot convert \"" + value + "\" to "
-            + pfi::lang::demangle(type.name())),
-        value_(value),
-        type_(type) {
-  }
+      const std::type_info& type);
 
-  ~yaml_invalid_scalar() throw() {}
+  ~yaml_invalid_scalar() throw();
+
+  const std::type_info& get_type() const {
+    return type_;
+  }
 
  private:
   std::string value_;
@@ -103,15 +104,10 @@ class yaml_invalid_scalar : public yaml_cast_exception {
 class yaml_not_found : public yaml_cast_exception {
  public:
   yaml_not_found(
-      const yaml_node_t& node,
-      const std::string& key)
-      : yaml_cast_exception(
-            node,
-            "\"" + key + "\" is not found"),
-        key_(key) {
-  }
+      const node& node,
+      const std::string& key);
 
-  ~yaml_not_found() throw() {}
+  ~yaml_not_found() throw();
 
   const std::string& get_key() const {
     return key_;

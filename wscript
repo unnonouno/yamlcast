@@ -28,6 +28,8 @@ def configure(conf):
         conf.env.append_value('LINKFLAGS', '-fprofile-arcs')
         conf.env.append_value('LINKFLAGS', '-ftest-coverage')
 
+    conf.env.VERSION = VERSION
+
 
 def build(bld):
     bld(source='yamlcast.pc.in',

@@ -8,4 +8,4 @@ Description: YAML Cast Library
 Version: @VERSION@
 Requires: pficommon yaml-0.1
 Cflags: -I${includedir}
-Libs:
+Libs: -L${libdir} -lyamlcast
