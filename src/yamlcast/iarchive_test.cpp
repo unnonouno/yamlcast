@@ -14,19 +14,8 @@ namespace yamlcast {
 
 template <typename T>
 void deserialize(const string& str, T& v) {
-  yaml_parser_t parser;
-  ::yaml_parser_initialize(&parser);
-  ::yaml_parser_set_input_string(
-       &parser,
-       reinterpret_cast<const unsigned char*>(str.c_str()),
-       str.size());
-  yaml_document_t document;
-  ::yaml_parser_load(&parser, &document);
-  ::yaml_parser_delete(&parser);
-
-  v = yaml_cast<T>(document);
-
-  ::yaml_document_delete(&document);
+  document::ptr yaml = document::parse_string(str);
+  v = yaml_cast<T>(*yaml);
 }
 
 template <typename T>
@@ -154,6 +143,27 @@ TEST(iarchive, ignore_non_scalar_key) {
   Empty e;
   deserialize("{[aa]: 1, n: 10}", e);
   EXPECT_EQ(10, e.n);
+}
+
+struct Any {
+  yamlcast::node::ptr arg;
+
+  template <typename Ar>
+  void serialize(Ar& ar) {
+    ar & MEMBER(arg);
+  }
+};
+
+TEST(iarchive, node) {
+  Any a;
+  document::ptr yaml = document::parse_string("{arg: {x: 10, y: 20}}");
+  a = yaml_cast<Any>(*yaml);
+  EXPECT_EQ(YAML_MAPPING_NODE, a.arg->type());
+
+  std::map<std::string, int> m;
+  from_yaml(*a.arg, m);
+  EXPECT_EQ(10, m["x"]);
+  EXPECT_EQ(20, m["y"]);
 }
 
 }  // namespace yamlcast
