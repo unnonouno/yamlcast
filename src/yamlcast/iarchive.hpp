@@ -25,6 +25,8 @@ class yaml_iarchive_cast {
 
   const class node& node() const { return node_; }
 
+  static const bool is_read = true;
+
  private:
   const class node& node_;
 };
